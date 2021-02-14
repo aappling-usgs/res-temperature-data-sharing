@@ -1,5 +1,22 @@
+#' Call gd_get (without any scipiper target builds) on a file in another repo on
+#' this file system, downloading that file from a shared Drive cache into that
+#' other repo
+#'
+#' @param ind_file the indicator file of the data file in the other repo, to be
+#'   downloaded to the corresponding location in that other repo
+#' @param repo the relative file path of the other repo. Usually it'll be right
+#'   alongside the current repo, e.g., '../lake-temperature-model-prep'
+gd_get_elsewhere <- function(ind_file, repo, ...) {
+  # switch to the elsewhere repo, with plans to always switch back to this one before exiting the function
+  this_repo <- getwd()
+  on.exit(setwd(this_repo))
+  setwd(repo)
+  
+  # fetch the file down to that elsewhere repo
+  gd_get(ind_file, ...)
+}
 
-
+# Write a layer of an sf object as a zipped-up shapefile
 sf_to_zip <- function(zip_filename, sf_object, layer_name){
   cdir <- getwd()
   on.exit(setwd(cdir))

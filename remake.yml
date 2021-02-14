@@ -5,45 +5,100 @@ packages:
   - readr
   - sbtools
   - sf
+  - yaml
 
 sources:
   - src/sb_utils.R
   - src/file_utils.R
+  - src/fetch_filter.R
+
+# Target/file naming convention:
+#   source pipeline
+#     ltmp = comes from lake-temperature-model-prep pipeline (except that meteo files keep their original names)
+#     rtpm = comes from res-temperature-process-models pipeline
+#     rtnn = comes from res-temperature-neural-networks pipeline
+#   modeling domain (currently not specifying for most files)
+#     drb = Delaware River Basin
 
 targets:
   all:
     depends:
       - log/sb_posted_files.csv
+  
+  # Define scope of data in this repo
+  site_ids_drb:
+    command: c(I(c(
+      Pepacton='nhdhr_151957878',
+      Cannonsville='nhdhr_120022743')))
     
+  #### Spatial data ####
 
-  sf_spatial_data:
-    command: st_read('example_data/example_shapefile/example_shapefile.shp')
-    depends:
-      - example_data/example_shapefile/example_shapefile.dbf
-      - example_data/example_shapefile/example_shapefile.prj
-      - example_data/example_shapefile/example_shapefile.shx
-  
+  reservoir_polygons:
+    command: fetch_filter_res_polygons(
+      out_rds = target_name,
+      in_ind = "../lake-temperature-model-prep/1_crosswalk_fetch/out/canonical_lakes_sf.rds.ind",
+      in_repo = I('../lake-temperature-model-prep/'),
+      site_ids = site_ids_drb)
+      
   spatial_metadata:
-    command: extract_feature(sf_spatial_data)
+    command: extract_feature(reservoir_polygons)
     
-  out_data/cars.csv:
-    command: file.copy(from = "example_data/example_cars.csv", 
-      to = target_name, overwrite = TRUE)
-  
-  out_data/spatial.zip:
+  out_data/reservoir_polygons.zip:
     command: sf_to_zip(zip_filename = target_name, 
-      sf_object = sf_spatial_data, layer_name = I('spatial_data'))
+      sf_object = reservoir_polygons, layer_name = I('spatial_data'))
+    
+  #### Transfers of files from lake-temperature-model-prep to SB ####
+  
+  # Filtered to relevant sites but otherwise untransformed
+  
+  out_data/ltmp_temps.rds:
+    command: fetch_filter_tibble(
+      out_rds = target_name,
+      in_ind = '../lake-temperature-model-prep/7b_temp_merge/out/drb_daily_reservoir_temps.rds.ind',
+      in_repo = I('../lake-temperature-model-prep/'),
+      site_ids = site_ids_drb)
+    
+  out_data/ltmp_levels.rds:
+    command: fetch_filter_tibble(
+      out_rds = target_name,
+      in_ind = '../lake-temperature-model-prep/7a_nwis_munge/out/drb_reservoirs_waterlevels_munged.rds.ind',
+      in_repo = I('../lake-temperature-model-prep/'),
+      site_ids = site_ids_drb)
+  
+  out_data/ltmp_nml_list.rds:
+    command: fetch_filter_nml(
+      out_rds = target_name,
+      in_ind = '../lake-temperature-model-prep/7_config_merge/out/nml_list.rds.ind',
+      in_repo = I('../lake-temperature-model-prep/'),
+      site_ids = site_ids_drb)
+      
+  # Not quite robust pipelining - if the files in in_data change
+  # but the filenames in nml_list.rds don't,
+  # this target will need to be force-rebuilt
+  log/meteo_files.yml:
+    command: fetch_meteo_files(
+      out_yml = target_name,
+      nml_rds = 'out_data/ltmp_nml_list.rds')
+
+  #### Prepare metadata ####
 
   out_xml/fgdc_metadata.xml:
     command: render(filename = target_name,
       "in_text/text_data_release.yml",
       spatial_metadata)
+  
+  #### Post to SB ####
     
+  # IMPORTANT: If you remove or rename a file on this list,
+  # you must manually delete the old file from the SB item
   log/sb_posted_files.csv:
     command: sb_replace_files(filename = target_name, 
-      sb_id = I('5faaac68d34eb413d5df1f22'),
-      "out_data/spatial.zip",
-      "out_data/cars.csv",
+      sb_id = I('6006eec9d34e592d867201d0'),
+      "out_data/reservoir_polygons.zip",
       "out_xml/fgdc_metadata.xml",
+      "out_data/ltmp_temps.rds",
+      "out_data/ltmp_levels.rds",
+      "out_data/ltmp_nml_list.rds",
+      file_hash = 'log/meteo_files.yml',
       sources = "src/sb_utils.R")
       

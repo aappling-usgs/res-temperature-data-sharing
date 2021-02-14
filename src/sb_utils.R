@@ -6,7 +6,7 @@
 #' @param file_hash a yaml file with filepath and hash value pairs. All files named in the 
 #' `file_hash` will be uploaded to sciencebase
 #' @param sources filepath(s) for where all of the functions that are needed for running 
-#' `sb_replace_files` exsit. For example, where `sb_replace_files`, `sb_render_post_xml`, 
+#' `sb_replace_files` exist. For example, where `sb_replace_files`, `sb_render_post_xml`, 
 #' `do_item_replace_tasks`, `upload_and_record`, and `combine_upload_times` are defined. It 
 #' is recommended to put them all in the same file.
 #' 
@@ -113,7 +113,9 @@ upload_and_record <- function(sb_id, filepath) {
   timestamp_chr <- format(timestamp, "%Y-%m-%d %H:%M %Z")
   
   # Then record when it happened and return that as an obj
-  return(tibble(filepath = filepath, sb_id = sb_id, time_uploaded_to_sb = timestamp_chr))
+  return(tibble(
+    filepath = filepath, md5 = tools::md5sum(filepath), 
+    sb_id = sb_id, time_uploaded_to_sb = timestamp_chr))
 }
 
 #' verify the files you are expect to be on sciencebase are indeed on sciencebase
@@ -127,7 +129,7 @@ upload_and_record <- function(sb_id, filepath) {
 #' @details this function call will fail if more than one unique `sb_id` is in the `file_tbl`,
 #' or if any duplicated file names exist on sciencebase for this `sb_id`. 
 verify_uploads <- function(file_tbl, tgt_names, remake_file){
-  
+
   sb_secret_login()
   sb_id <- unique(file_tbl$sb_id)
   # this call is not robust to a tbl w/ more than one unique sb_id

@@ -1,12 +1,12 @@
 title: >-
-  Data release: [your title here]
+  Data Sharing for Reservoir Temperature Modeling
 
 
 abstract: >-
-  [a description of this data release]
+  Repository for collaboration and internal sharing of model inputs and outputs and observations of water temperature in reservoirs
       
-authors: ["[NAME 1]", "[NAME 2]"]
-pubdate: 2020 # replace with actual year, e.g., 2020
+authors: ["Alison Appling", "Samantha Oliver", "Rasha Atshan"]
+pubdate: 2021
 doi: https://doi.org/YY.XXXXX/XXXXXX # replace with actual DOI
 
 build-environment: Multiple computer systems were used to generate these data, including linux, OSX. The open source languages R and Python were used on all systems.
@@ -14,13 +14,18 @@ build-environment: Multiple computer systems were used to generate these data, i
 # ----associated publication----
 larger-cites:
   -
+    authors: ["Xiaowei Jia", "others"]
+    title: >-
+      TBD
+    pubdate: 2021
+
+# ----supporting publications----    
+cross-cites:
+  -
     authors: ["Jordan S. Read", "Xiaowei Jia", "Jared Willard", "Alison P. Appling", "Jacob A. Zwart","Samantha K. Oliver","Anuj Karpatne","Gretchen J.A. Hansen", "Paul C. Hanson", "William Watkins", "Michael Steinbach","Vipin Kumar"]
     title: >-
       Process-guided deep learning predictions of lake water temperature
     pubdate: 2019
-
-# ----supporting publications----    
-cross-cites:
   -
     authors: ['Luke A. Winslow','Gretchen J.A. Hansen','Jordan S. Read','Michael Notaro']
     title: >-
@@ -29,7 +34,7 @@ cross-cites:
     link: http://dx.doi.org/10.1038/sdata.2017.53
 
 process-date: !expr format(Sys.time(),'%Y%m%d')
-file-format: a single comma-delimited file and a single zipped shapefile
+file-format: A zipped shapefile, R binary files (.rds), and other formats
 
 entities:
   -
@@ -82,7 +87,7 @@ entities:
       data-units: NA
 
 
-purpose: Fisheries biology, limnological research, and climate science.
+purpose: Reservoir management, fisheries biology, limnological research, and climate science.
 start-date: 19800401
 end-date: 20191231
 
