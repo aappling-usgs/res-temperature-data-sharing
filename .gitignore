@@ -5,6 +5,9 @@
 .DS_Store
 .remake
 
+in_data
 out_data/*.csv
 out_data/*.zip
+out_data/*.rds
+out_data/*.feather
 out_xml/*.xml

@@ -28,8 +28,8 @@ targets:
   # Define scope of data in this repo
   site_ids_drb:
     command: c(I(c(
-      Pepacton='nhdhr_151957878',
-      Cannonsville='nhdhr_120022743')))
+      Pepacton = 'nhdhr_151957878',
+      Cannonsville = 'nhdhr_120022743')))
     
   #### Spatial data ####
 
@@ -80,6 +80,21 @@ targets:
       out_yml = target_name,
       nml_rds = 'out_data/ltmp_nml_list.rds')
 
+
+  #### Transfers of files from delaware-model-prep to SB ####
+
+  out_data/res_io_obs.feather:
+    command: copy_filter_feather(
+      out_feather = target_name,
+      in_feather = '../delaware-model-prep/9_collaborator_data/res/res_io_obs.feather',
+      site_ids = site_ids_drb)
+
+  out_data/res_io_sntemp.feather:
+    command: copy_filter_feather(
+      out_feather = target_name,
+      in_feather = '../delaware-model-prep/9_collaborator_data/res/res_io_sntemp.feather',
+      site_ids = site_ids_drb)
+
   #### Prepare metadata ####
 
   out_xml/fgdc_metadata.xml:
@@ -99,6 +114,8 @@ targets:
       "out_data/ltmp_temps.rds",
       "out_data/ltmp_levels.rds",
       "out_data/ltmp_nml_list.rds",
+      "out_data/res_io_obs.feather",
+      "out_data/res_io_sntemp.feather",
       file_hash = 'log/meteo_files.yml',
       sources = "src/sb_utils.R")
       
